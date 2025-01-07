@@ -44,8 +44,10 @@ dependencies {
     implementation(libs.foundation.android)
     implementation("com.squareup.okio:okio:3.5.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0") // 如果需要 OkHttp
-    implementation ("org.nanohttpd:nanohttpd:2.3.1")//本地模拟服务器
-
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")//用于自动刷新
+    implementation ("com.github.bumptech.glide:glide:4.15.1")  // 添加 Glide 依赖
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")  // 添加 Glide 编译器
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
