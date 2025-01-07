@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.upload.ChatMessage;
+import com.example.upload.R;
 
 import java.util.List;
 
@@ -24,14 +26,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        // 判断该消息是文字还是图片
         ChatMessage chatMessage = chatMessages.get(position);
         return chatMessage.isImage() ? TYPE_IMAGE : TYPE_TEXT;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // 根据消息类型创建对应的 ViewHolder
         if (viewType == TYPE_IMAGE) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image_message, parent, false);
             return new ImageMessageViewHolder(view);
@@ -43,7 +43,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        // 获取消息并绑定到对应的 ViewHolder
         ChatMessage chatMessage = chatMessages.get(position);
 
         if (getItemViewType(position) == TYPE_IMAGE) {
@@ -64,14 +63,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public ImageMessageViewHolder(View itemView) {
             super(itemView);
-            messageImageView = itemView.findViewById(R.id.messageImageView); // 在布局中找到ImageView
+            messageImageView = itemView.findViewById(R.id.messageImageView);
         }
 
         public void bind(ChatMessage chatMessage) {
-            // 使用 Glide 加载图片，content 为图片路径
             Glide.with(messageImageView.getContext())
                     .load(chatMessage.getContent()) // 获取图片路径
-                    .into(messageImageView); // 设置图片到ImageView
+                    .into(messageImageView);
         }
     }
 
@@ -81,11 +79,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public TextMessageViewHolder(View itemView) {
             super(itemView);
-            messageTextView = itemView.findViewById(R.id.messageTextView); // 在布局中找到TextView
+            messageTextView = itemView.findViewById(R.id.messageTextView);
         }
 
         public void bind(ChatMessage chatMessage) {
-            // 设置消息的文本内容
             messageTextView.setText(chatMessage.getContent());
         }
     }

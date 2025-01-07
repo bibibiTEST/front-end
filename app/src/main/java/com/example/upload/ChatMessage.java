@@ -12,15 +12,33 @@ public class ChatMessage {
         this.isImage = isImage;
     }
 
+    // 获取消息内容，文字或者图片URL
     public String getContent() {
         return content;
     }
 
+    // 判断是否是发送者
     public boolean isSentByUser() {
         return isSentByUser;
     }
 
+    // 判断消息是否是图片
     public boolean isImage() {
         return isImage;
+    }
+
+    // 设置内容
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    // 设置是否是图片
+    public void setImage(boolean isImage) {
+        this.isImage = isImage;
+    }
+
+    // 设置是否由用户发送
+    public void setSentByUser(boolean isSentByUser) {
+        this.isSentByUser = isSentByUser;
     }
 }

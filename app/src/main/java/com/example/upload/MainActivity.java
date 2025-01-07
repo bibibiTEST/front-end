@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +31,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_UPLOAD = 1; // 定义请求码
-    private static final String BASE_URL = "172.20.10.6:5000/upload"; // 后端的基础 URL
+    private static final String BASE_URL = "http://172.20.10.6:5000/"; // 后端的基础 URL
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
     private List<ChatMessage> chatMessages;
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 从后端获取消息记录
+
     private void fetchMessagesFromServer() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -104,6 +107,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "网络请求失败", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // 使用 Glide 加载图片
+    private void loadImage(String imageUrl) {
+        Glide.with(MainActivity.this)
+                .load(BASE_URL + "api/messages/files/" + imageUrl) // 图片的完整 URL
+                .into(myImageView);  // 展示到 ImageView
     }
 
     @Override
