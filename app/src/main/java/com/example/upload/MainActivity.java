@@ -18,9 +18,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -76,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 从后端获取消息记录
-
     private void fetchMessagesFromServer() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -129,6 +132,9 @@ public class MainActivity extends AppCompatActivity {
                     Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
                     myImageView.setImageBitmap(bitmap);
                     Toast.makeText(this, "图片上传成功并显示", Toast.LENGTH_SHORT).show();
+
+                    // 发送图片和用户 ID
+                    sendMessage(imageFile);
                 } else {
                     Toast.makeText(this, "图片文件不存在", Toast.LENGTH_SHORT).show();
                 }
@@ -136,5 +142,41 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "未接收到图片路径", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    // 发送消息的功能
+    private void sendMessage(File imageFile) {
+        // 创建请求体：用户 ID 固定为 1
+        int userId = 1;
+        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), imageFile);
+        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", imageFile.getName(), requestBody);
+
+        // 创建请求体：用户 ID
+        RequestBody userIdBody = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(userId));
+
+        // 使用 Retrofit 上传图片并发送用户 ID
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        ApiService apiService = retrofit.create(ApiService.class);
+
+        Call<ResponseBody> call = apiService.sendMessage(imagePart, userIdBody);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "消息发送成功", Toast.LENGTH_SHORT).show();
+                    fetchMessagesFromServer(); // 刷新消息列表
+                } else {
+                    Toast.makeText(MainActivity.this, "发送失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "网络请求失败", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
