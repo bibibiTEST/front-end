@@ -12,7 +12,7 @@ import java.io.File;
 @ExperimentalFoundationApi
 public class UploadUtil {
 
-    private static final String UPLOAD_URL = "https://example.com/upload"; // 替换为你的服务器地址
+    private static final String UPLOAD_URL = "http://172.20.10.6:5000/api/upload"; // 替换为你的服务器地址
 
 //    private static final MediaType MEDIA_TYPE_JPEG = "image/jpeg".toMediaTypeOrNull();
 

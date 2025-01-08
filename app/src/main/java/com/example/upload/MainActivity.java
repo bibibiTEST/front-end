@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, UploadActivity.class);
             startActivityForResult(intent, REQUEST_CODE_UPLOAD);
         });
+
     }
 
     // 从后端获取消息记录
@@ -134,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "图片上传成功并显示", Toast.LENGTH_SHORT).show();
 
                     // 发送图片和用户 ID
-                    sendMessage(imageFile);
+                    sendMessage(imageFile,userId);
                 } else {
                     Toast.makeText(this, "图片文件不存在", Toast.LENGTH_SHORT).show();
                 }
@@ -145,9 +147,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 发送消息的功能
-    private void sendMessage(File imageFile) {
+    int userId = 1;
+    private void sendMessage(File imageFile,int userId) {
         // 创建请求体：用户 ID 固定为 1
-        int userId = 1;
         RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), imageFile);
         MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", imageFile.getName(), requestBody);
 
@@ -160,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         ApiService apiService = retrofit.create(ApiService.class);
+        Log.d("Request URL", "Request URL: " + BASE_URL + "api/upload");
 
         Call<ResponseBody> call = apiService.sendMessage(imagePart, userIdBody);
         call.enqueue(new Callback<ResponseBody>() {

@@ -28,7 +28,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class UploadActivity extends AppCompatActivity {
-    private static final String UPLOAD_URL = "http://172.20.10.6:5000/upload";
+    private static final String UPLOAD_URL = "http://172.20.10.6:5000/api/upload";
     private ImageView imageView;
     private Button btnSelectImage, btnUploadImage;
     private Uri selectedImageUri;
@@ -109,11 +109,12 @@ public class UploadActivity extends AppCompatActivity {
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .build();
-
+int userId=1;//暂时将userid假设为1
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("file", file.getName(),
                             RequestBody.create(MediaType.parse("image/jpeg"), file))
+                    .addFormDataPart("userId", String.valueOf(userId))
                     .build();
 
             Request request = new Request.Builder()
