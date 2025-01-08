@@ -100,7 +100,15 @@ public class MainActivity extends AppCompatActivity {
                     if (messages != null) {
                         chatMessages.clear();
                         chatMessages.addAll(messages); // 加载获取的消息
+                        // 遍历消息，加载图片
+                        for (ChatMessage message : messages) {
+                            if (message.isImage()) {
+                                loadImage(message.getContent());  // 加载图片
+                            }
+                        }
+
                         chatAdapter.notifyDataSetChanged();
+
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "获取消息失败", Toast.LENGTH_SHORT).show();
@@ -117,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     // 使用 Glide 加载图片
     private void loadImage(String imageUrl) {
         Glide.with(MainActivity.this)
-                .load(BASE_URL + "api/messages/files/" + imageUrl) // 图片的完整 URL
+                .load(BASE_URL + "api/messages/" + imageUrl) // 图片的完整 URL
                 .into(myImageView);  // 展示到 ImageView
     }
 
