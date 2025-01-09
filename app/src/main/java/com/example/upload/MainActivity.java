@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     // 使用 Glide 加载图片
     private void loadImage(String imageUrl) {
         Glide.with(MainActivity.this)
-                .load(BASE_URL + "api/messages/" + imageUrl) // 图片的完整 URL
+                .load(BASE_URL + imageUrl) // 图片的完整 URL
                 .into(myImageView);  // 展示到 ImageView
     }
 
