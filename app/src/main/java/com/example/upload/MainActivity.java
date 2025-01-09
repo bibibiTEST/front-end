@@ -1,5 +1,6 @@
 package com.example.upload;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,9 +18,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.upload.decode.RC4;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -79,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 String key=message;//密钥保存
                 chatAdapter.notifyDataSetChanged(); // 刷新适配器
                 inputMessage.setText(""); // 清空输入框
+
             } else {
                 Toast.makeText(MainActivity.this, "密钥不能为空", Toast.LENGTH_SHORT).show();
                 return; // 如果消息为空，不继续执行
@@ -86,7 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
             // 如果已选中图片，则发送消息
             if (selectedImageFile != null) {
-                uploadImageToServer(selectedImageFile, userId); // 发送用户 ID 和图片
+                try {
+                    uploadImageToServer(selectedImageFile, userId, message); // 发送用户 ID 和图片
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 Toast.makeText(MainActivity.this, "请先选择图片", Toast.LENGTH_SHORT).show();
             }
@@ -174,19 +183,32 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    private void uploadImageToServer(File file, int userId) {
+    @SuppressLint({"NewApi", "LocalSuppress"})
+    private void uploadImageToServer(File file, int userId, String key) throws IOException {
+        // 读取图片文件并获取Bitmap对象
+        Bitmap originalBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+
+        // 使用RC4加密图像
+        Bitmap encryptedBitmap = RC4.encryptImage(key, file.getAbsolutePath());
+
+        // 保存加密后的图像
+        String encryptedImagePath = getCacheDir() + "/encrypted_image.png";  // 保存加密后的图片的路径
+        RC4.saveBitmapToFile(encryptedBitmap, encryptedImagePath);
+        File encryptedFile = new File(encryptedImagePath);  // 加密后的文件
+
         new Thread(() -> {
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(15, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .build();
+            // 将加密后的文件封装成RequestBody
 
             RequestBody requestBody = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
-                    .addFormDataPart("file", file.getName(),
-                            RequestBody.create(MediaType.parse("image/jpeg"), file))
-                    .addFormDataPart("userId", String.valueOf(userId))
+                    .addFormDataPart("file", encryptedFile.getName(),
+                            RequestBody.create(MediaType.parse("application/octet-stream"), encryptedFile)) // 这里指定MIME类型
+                    .addFormDataPart("userId", String.valueOf(userId))  // 传递userId
                     .build();
 
             Request request = new Request.Builder()
@@ -199,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     runOnUiThread(() -> {
                         // 上传成功后手动添加消息到列表
-                        String message = "Message with image"; // 示例文本消息
+                        String message = "Message with encrypted image"; // 示例文本消息
                         ChatMessage newMessage = new ChatMessage(); // 假设服务器返回图片URL
                         chatMessages.add(newMessage);
                         chatAdapter.notifyDataSetChanged(); // 刷新 RecyclerView
@@ -213,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(MainActivity.this, "请求执行过程出错: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
         }).start();
+
     }
 
     private void fetchMessagesFromServer() {
@@ -267,48 +290,8 @@ public class MainActivity extends AppCompatActivity {
                 .into(displayImageView);  // 将图片加载到 displayImageView
     }
 
-
     // 发送消息的功能
     int userId = 1;
-    private void sendMessage(File imageFile, int userId) {
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image/*"), imageFile);
-        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", imageFile.getName(), requestBody);
 
-        RequestBody userIdBody = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(userId));
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        ApiService apiService = retrofit.create(ApiService.class);
-
-        Call<ResponseBody> call = apiService.sendMessage(imagePart, userIdBody);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "消息发送成功", Toast.LENGTH_SHORT).show();
-                    fetchMessagesFromServer(); // 刷新消息列表
-                } else {
-                    // 打印请求的详细信息
-                    try {
-                        Log.d("Retrofit", "Request URL: " + call.request().url());
-                        Log.d("Retrofit", "Request Method: " + call.request().method());
-                        Log.d("Retrofit", "Request Headers: " + call.request().headers());
-                        Log.d("Retrofit", "Request Body: " + call.request().body());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    Toast.makeText(MainActivity.this, "发送失败", Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "网络请求失败", Toast.LENGTH_SHORT).show();
-            }
-
-        });
-
-    }
 }
 
