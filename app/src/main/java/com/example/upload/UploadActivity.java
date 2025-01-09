@@ -82,11 +82,18 @@ public class UploadActivity extends AppCompatActivity {
         }
     }
 
+
+    private int imageCounter = 0; // 定义全局变量，用于计数
+
     private File saveUriToFile(Uri uri) {
         try {
-            File tempFile = new File(getCacheDir(), "upload_image.jpg");
+            // 生成带自增数字的文件名
+            String fileName = "upload_image_" + (++imageCounter) + ".jpg";
+            File tempFile = new File(getCacheDir(), fileName);
+
             InputStream inputStream = getContentResolver().openInputStream(uri);
             FileOutputStream outputStream = new FileOutputStream(tempFile);
+
             byte[] buffer = new byte[1024];
             int length;
             while ((length = inputStream.read(buffer)) > 0) {

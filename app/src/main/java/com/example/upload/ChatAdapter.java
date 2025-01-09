@@ -24,11 +24,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.chatMessages = chatMessages;
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        ChatMessage chatMessage = chatMessages.get(position);
-        return chatMessage.isImage() ? TYPE_IMAGE : TYPE_TEXT;
-    }
+//    @Override
+//    public int getItemViewType(int position) {
+//        ChatMessage chatMessage = chatMessages.get(position);
+//        return chatMessage.isImage() ? TYPE_IMAGE : TYPE_TEXT;
+//    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
